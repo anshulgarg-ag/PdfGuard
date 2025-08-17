@@ -1,0 +1,78 @@
+;
+; PdfGuard.inf
+;
+; Installation file for the PdfGuard Minifilter Driver
+; Copyright (c) My Company. All rights reserved.
+;
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = "System"
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider    = %MyCompany%
+DriverVer   = 10/18/2023,1.0.0.3  ; Incremented version
+CatalogFile = PdfGuard.cat
+PnpLockdown = 1
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+PdfGuard.sys = 1
+
+[DestinationDirs]
+CopyFiles.Driver = 13 ; DIRID_DRIVERS, the secure driver store
+
+;
+; ======== Default Install Section for x64 architecture ========
+;
+[DefaultInstall.NTamd64]
+CopyFiles           = CopyFiles.Driver
+
+[DefaultInstall.NTamd64.Services]
+AddService          = %ServiceName%,,PdfGuard.Service
+
+;
+; ======== Default Uninstall Section for x64 architecture ========
+;
+[DefaultUninstall.NTamd64]
+DelFiles            = CopyFiles.Driver
+DelReg              = DelReg.Keys
+
+[DefaultUninstall.NTamd64.Services]
+DelService          = %ServiceName%, 0x200 ; SPSVCINST_STOPSERVICE
+
+;
+; ======== Driver Service and Registry Installation ========
+;
+[PdfGuard.Service]
+DisplayName      = %ServiceName%
+Description      = %ServiceDescription%
+ServiceBinary    = %13%\PdfGuard.sys ; CRITICAL: This path must use the DIRID
+ServiceType      = 2                 ; SERVICE_FILE_SYSTEM_DRIVER
+StartType        = 1                 ; SERVICE_SYSTEM_START
+ErrorControl     = 1                 ; SERVICE_ERROR_NORMAL
+LoadOrderGroup   = "FSFilter Activity Monitor"
+AddReg           = AddReg.Instances
+
+[AddReg.Instances]
+HKR, "Instances", "DefaultInstance", 0x00000000, %DefaultInstance%
+
+[DelReg.Keys]
+HKR, "Instances"
+
+;
+; ======== File Copy List ========
+;
+[CopyFiles.Driver]
+PdfGuard.sys
+
+;
+; =================== Localizable Strings ===================
+;
+[Strings]
+MyCompany             = "My Company"
+ServiceName           = "PdfGuard"
+ServiceDescription    = "PDF-only Access Filter for Removable Media"
+DiskName              = "PdfGuard Source Disk"
+DefaultInstance       = "PdfGuard Instance"
